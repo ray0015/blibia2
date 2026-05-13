@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblia Sagrada - RV1960</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f5f0e8;
+            --text: #2c1810;
+            --text-secondary: #5c4a3a;
+            --verse-number: #b8956a;
+            --accent: #8b6914;
+            --border: #d4c5b2;
+            --panel-bg: #ede4d3;
+            --highlight: #fef3c7;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #d4c5b2;
+            --text-secondary: #a09080;
+            --verse-number: #8b7355;
+            --accent: #c9a84c;
+            --border: #3a3025;
+            --panel-bg: #252525;
+            --highlight: #3a3025;
+        }
+
+        [data-theme="midnight"] {
+            --bg: #0a0a0f;
+            --text: #c8c8d0;
+            --text-secondary: #8888a0;
+            --verse-number: #6a6a8a;
+            --accent: #8888cc;
+            --border: #1a1a2e;
+            --panel-bg: #12121a;
+            --highlight: #1a1a2e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lora', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.8;
+            transition: 0.3s;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 48px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+        }
+
+        .book-title {
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .language-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 999px;
+            transition: 0.3s;
+        }
+
+        .language-wrapper:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        .language-wrapper i {
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .language-select {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .language-select option {
+            background: var(--panel-bg);
+            color: var(--text);
+        }
+
+        .icon-btn, .ctrl-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover, .ctrl-btn:hover {
+            background: var(--highlight);
+            color: var(--accent);
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 48px; left: 0; bottom: 0;
+            width: 300px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            transform: translateX(-100%);
+            transition: 0.3s;
+            z-index: 99;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .side-panel.open { transform: translateX(0); }
+
+        .side-panel h3 {
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .side-panel select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .chapter-num {
+            padding: 8px;
+            text-align: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chapter-num:hover { background: var(--highlight); }
+
+        .chapter-num.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .reading-area {
+            max-width: 700px;
+            margin: auto;
+            padding: 72px 24px 90px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 100px 20px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-screen i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.4;
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .chapter-header h2 {
+            color: var(--accent);
+            font-size: 2rem;
+        }
+
+        .verse {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .verse:hover { background: var(--highlight); }
+
+        .verse-num {
+            width: 28px;
+            flex-shrink: 0;
+            text-align: right;
+            color: var(--verse-number);
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding-top: 4px;
+        }
+
+        .verse-content {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .verse-text {
+            flex: 1;
+            font-size: 1.15rem;
+        }
+
+        .verse-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .verse:hover .verse-actions {
+            opacity: 1;
+        }
+
+        .reading-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .font-size-display {
+            min-width: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            z-index: 98;
+        }
+
+        .overlay.show { display: block; }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner i {
+            animation: spin 1s linear infinite;
+            font-size: 2rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--accent);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 300;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width:768px) {
+            .side-panel { width: 85%; }
+            .verse-text { font-size: 1.05rem; }
+            .verse-actions { opacity: 1; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div class="top-bar">
+        <button class="icon-btn" onclick="togglePanel()">
+            <i class="fas fa-book-open"></i>
+        </button>
+        <span class="book-title" id="currentBookTitle">Biblia Sagrada</span>
+        <div class="top-bar-actions">
+            <div class="language-wrapper">
+                <i class="fas fa-language"></i>
+                <select id="languageSelect" onchange="changeLanguage()" class="language-select">
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="pt">🇧🇷 Português</option>
+                </select>
+            </div>
+            <button class="icon-btn" id="themeToggle" onclick="cycleTheme()">
+                <i class="fas fa-sun"></i>
+            </button>
+            <button class="icon-btn" onclick="getRandomVerse()">
+                <i class="fas fa-dice"></i>
+            </button>
+            <button class="icon-btn" onclick="showFavorites()" title="Favoritos">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="togglePanel()"></div>
+    <div class="side-panel" id="sidePanel">
+        <h3>📖 Libros</h3>
+        <select id="bookSelect" onchange="onBookSelect()">
+            <option value="">Seleccionar libro...</option>
+        </select>
+        <div class="chapter-grid" id="chapterGrid"></div>
+    </div>
+
+    <div class="reading-area" id="readingArea">
+        <div class="welcome-screen">
+            <i class="fas fa-book-open"></i>
+            <h2>Biblia Sagrada</h2>
+            <p>Reina Valera 1960</p>
+        </div>
+    </div>
+
+    <div class="reading-controls">
+        <button class="ctrl-btn" onclick="changeFontSize(-1)">A-</button>
+        <span class="font-size-display" id="fontSizeDisplay">100%</span>
+        <button class="ctrl-btn" onclick="changeFontSize(1)">A+</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = 'https://bible-api.com';
+        let currentLanguage = 'es';
+
+        const BOOKS = [
+            { es: 'Génesis', en: 'Genesis', chapters: 50 },
+            { es: 'Éxodo', en: 'Exodus', chapters: 40 },
+            { es: 'Levítico', en: 'Leviticus', chapters: 27 },
+            { es: 'Números', en: 'Numbers', chapters: 36 },
+            { es: 'Deuteronomio', en: 'Deuteronomy', chapters: 34 },
+            { es: 'Josué', en: 'Joshua', chapters: 24 },
+            { es: 'Jueces', en: 'Judges', chapters: 21 },
+            { es: 'Rut', en: 'Ruth', chapters: 4 },
+            { es: '1 Samuel', en: '1 Samuel', chapters: 31 },
+            { es: '2 Samuel', en: '2 Samuel', chapters: 24 },
+            { es: '1 Reyes', en: '1 Kings', chapters: 22 },
+            { es: '2 Reyes', en: '2 Kings', chapters: 25 },
+            { es: '1 Crónicas', en: '1 Chronicles', chapters: 29 },
+            { es: '2 Crónicas', en: '2 Chronicles', chapters: 36 },
+            { es: 'Esdras', en: 'Ezra', chapters: 10 },
+            { es: 'Nehemías', en: 'Nehemiah', chapters: 13 },
+            { es: 'Ester', en: 'Esther', chapters: 10 },
+            { es: 'Job', en: 'Job', chapters: 42 },
+            { es: 'Salmos', en: 'Psalms', chapters: 150 },
+            { es: 'Proverbios', en: 'Proverbs', chapters: 31 },
+            { es: 'Eclesiastés', en: 'Ecclesiastes', chapters: 12 },
+            { es: 'Cantares', en: 'Song of Solomon', chapters: 8 },
+            { es: 'Isaías', en: 'Isaiah', chapters: 66 },
+            { es: 'Jeremías', en: 'Jeremiah', chapters: 52 },
+            { es: 'Lamentaciones', en: 'Lamentations', chapters: 5 },
+            { es: 'Ezequiel', en: 'Ezekiel', chapters: 48 },
+            { es: 'Daniel', en: 'Daniel', chapters: 12 },
+            { es: 'Oseas', en: 'Hosea', chapters: 14 },
+            { es: 'Joel', en: 'Joel', chapters: 3 },
+            { es: 'Amós', en: 'Amos', chapters: 9 },
+            { es: 'Abdías', en: 'Obadiah', chapters: 1 },
+            { es: 'Jonás', en: 'Jonah', chapters: 4 },
+            { es: 'Miqueas', en: 'Micah', chapters: 7 },
+            { es: 'Nahum', en: 'Nahum', chapters: 3 },
+            { es: 'Habacuc', en: 'Habakkuk', chapters: 3 },
+            { es: 'Sofonías', en: 'Zephaniah', chapters: 3 },
+            { es: 'Hageo', en: 'Haggai', chapters: 2 },
+            { es: 'Zacarías', en: 'Zechariah', chapters: 14 },
+            { es: 'Malaquías', en: 'Malachi', chapters: 4 },
+            { es: 'Mateo', en: 'Matthew', chapters: 28 },
+            { es: 'Marcos', en: 'Mark', chapters: 16 },
+            { es: 'Lucas', en: 'Luke', chapters: 24 },
+            { es: 'Juan', en: 'John', chapters: 21 },
+            { es: 'Hechos', en: 'Acts', chapters: 28 },
+            { es: 'Romanos', en: 'Romans', chapters: 16 },
+            { es: '1 Corintios', en: '1 Corinthians', chapters: 16 },
+            { es: '2 Corintios', en: '2 Corinthians', chapters: 13 },
+            { es: 'Gálatas', en: 'Galatians', chapters: 6 },
+            { es: 'Efesios', en: 'Ephesians', chapters: 6 },
+            { es: 'Filipenses', en: 'Philippians', chapters: 4 },
+            { es: 'Colosenses', en: 'Colossians', chapters: 4 },
+            { es: '1 Tesalonicenses', en: '1 Thessalonians', chapters: 5 },
+            { es: '2 Tesalonicenses', en: '2 Thessalonians', chapters: 3 },
+            { es: '1 Timoteo', en: '1 Timothy', chapters: 6 },
+            { es: '2 Timoteo', en: '2 Timothy', chapters: 4 },
+            { es: 'Tito', en: 'Titus', chapters: 3 },
+            { es: 'Filemón', en: 'Philemon', chapters: 1 },
+            { es: 'Hebreos', en: 'Hebrews', chapters: 13 },
+            { es: 'Santiago', en: 'James', chapters: 5 },
+            { es: '1 Pedro', en: '1 Peter', chapters: 5 },
+            { es: '2 Pedro', en: '2 Peter', chapters: 3 },
+            { es: '1 Juan', en: '1 John', chapters: 5 },
+            { es: '2 Juan', en: '2 John', chapters: 1 },
+            { es: '3 Juan', en: '3 John', chapters: 1 },
+            { es: 'Judas', en: 'Jude', chapters: 1 },
+            { es: 'Apocalipsis', en: 'Revelation', chapters: 22 }
+        ];
+
+        let currentBook = null;
+        let currentChapter = 0;
+        let fontSize = 100;
+        let themeIndex = 0;
+        const themes = ['light', 'dark', 'midnight'];
+
+        function init() {
+            const select = document.getElementById('bookSelect');
+            BOOKS.forEach(book => {
+                select.innerHTML += `<option value="${book.es}">${book.es}</option>`;
+            });
+        }
+
+        function changeLanguage() {
+            currentLanguage = document.getElementById('languageSelect').value;
+            if (currentBook && currentChapter) {
+                loadChapter();
+            }
+        }
+
+        function cycleTheme() {
+            themeIndex = (themeIndex + 1) % themes.length;
+            document.body.setAttribute('data-theme', themes[themeIndex]);
+        }
+
+        function togglePanel() {
+            document.getElementById('sidePanel').classList.toggle('open');
+            document.querySelector('.overlay').classList.toggle('show');
+        }
+
+        function onBookSelect() {
+            const selected = document.getElementById('bookSelect').value;
+            currentBook = BOOKS.find(b => b.es === selected);
+            let html = '';
+            for (let i = 1; i <= currentBook.chapters; i++) {
+                html += `<div class="chapter-num" onclick="selectChapter(${i}, this)">${i}</div>`;
+            }
+            document.getElementById('chapterGrid').innerHTML = html;
+        }
+
+        function selectChapter(chapter, element) {
+            currentChapter = chapter;
+            document.querySelectorAll('.chapter-num').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            loadChapter();
+            togglePanel();
+        }
+
+        // ===============================
+        // 📖 CARGAR CAPÍTULO (CON TRADUCCIÓN)
+        // ===============================
+        async function loadChapter() {
+            const area = document.getElementById('readingArea');
+            area.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner"></i>
+                    <p>Cargando...</p>
+                </div>
+            `;
+
+            try {
+                const url = `${API}/${encodeURIComponent(currentBook.en)}%20${currentChapter}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                let html = `
+                    <div class="chapter-header">
+                        <h2>${currentBook.es}</h2>
+                        <div class="chapter-num-display">Capítulo ${currentChapter}</div>
+                    </div>
+                `;
+
+                for (const v of data.verses) {
+                    let text = v.text.trim();
+
+                    // =========================
+                    // 🌍 TRADUCCIÓN PORTUGUÉS
+                    // =========================
+                    if (currentLanguage === 'pt') {
+                        try {
+                            const tr = await fetch(
+                                `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|pt`
+                            );
+                            const trData = await tr.json();
+                            if (trData.responseData.translatedText) {
+                                text = trData.responseData.translatedText;
+                            }
+                        } catch (e) {
+                            console.log('Error traducción PT');
+                        }
+                    }
+
+                    // =========================
+                    // 🌍 TRADUCCIÓN ESPAÑOL
+                    // =========================
+                    if (currentLanguage === 'es') {
+                        try {
+                            const tr = await fetch(
+                                `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|es`
+                            );
+                            const trData = await tr.json();
+                            if (trData.responseData.translatedText) {
+                                text = trData.responseData.translatedText;
+                                // Estilo bíblico
+                                text = text
+                                    .replace(/tu /gi, 'vos ')
+                                    .replace(/ustedes/gi, 'vosotros')
+                                    .replace(/eres/gi, 'sois')
+                                    .replace(/tienen/gi, 'tenéis')
+                                    .replace(/bendecido/gi, 'bienaventurado')
+                                    .replace(/Dios/gi, 'Dios');
+                            }
+                        } catch (e) {
+                            console.log('Error traducción ES');
+                        }
+                    }
+
+                    html += `
+                        <div class="verse">
+                            <span class="verse-num">${v.verse}</span>
+                            <div class="verse-content">
+                                <span class="verse-text" id="verse-${v.verse}">${text}</span>
+                                <div class="verse-actions">
+                                    <button class="icon-btn" onclick="speakVerse('verse-${v.verse}')" title="Escuchar versículo">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                    <button class="icon-btn" onclick="saveFavorite('${currentBook.es} ${currentChapter}:${v.verse}', \`${text.replace(/'/g, "\\'").replace(/`/g, "\\`")}\`)" title="Guardar favorito">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                area.innerHTML = html;
+                applyFontSize();
+            } catch (error) {
+                console.error(error);
+                area.innerHTML = `
+                    <div class="welcome-screen">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function changeFontSize(delta) {
+            fontSize = Math.max(70, Math.min(200, fontSize + delta * 10));
+            applyFontSize();
+            document.getElementById('fontSizeDisplay').textContent = fontSize + '%';
+        }
+
+        function applyFontSize() {
+            const scale = fontSize / 100;
+            document.querySelectorAll('.verse-text').forEach(el => {
+                el.style.fontSize = (1.15 * scale) + 'rem';
+            });
+        }
+
+        async function getRandomVerse() {
+            const randomBook = BOOKS[Math.floor(Math.random() * BOOKS.length)];
+            const chapter = Math.floor(Math.random() * randomBook.chapters) + 1;
+            const url = `${API}/${encodeURIComponent(randomBook.en)}%20${chapter}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const verse = data.verses[Math.floor(Math.random() * data.verses.length)];
+            showToast(`"${verse.text.trim()}" - ${randomBook.es} ${chapter}:${verse.verse}`);
+        }
+
+        // ===============================
+        // 🔊 LEER VERSÍCULO
+        // ===============================
+        function speakVerse(id) {
+            const text = document.getElementById(id).innerText;
+            speechSynthesis.cancel();
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = currentLanguage === 'pt' ? 'pt-BR' : 'es-ES';
+            speech.rate = 0.92;
+            speech.pitch = 1;
+            speechSynthesis.speak(speech);
+        }
+
+        // ===============================
+        // ❤️ FAVORITOS
+        // ===============================
+        function saveFavorite(reference, text) {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            favorites.push({ reference, text });
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            showToast('❤️ Versículo guardado');
+        }
+
+        function showFavorites() {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            if (favorites.length === 0) {
+                showToast('No tienes favoritos guardados');
+                return;
+            }
+
+            const area = document.getElementById('readingArea');
+            let html = `<div class="chapter-header"><h2>❤️ Favoritos</h2></div>`;
+            favorites.forEach((fav, i) => {
+                html += `
+                    <div class="verse">
+                        <span class="verse-num">${i + 1}</span>
+                        <div class="verse-content">
+                            <div>
+                                <strong style="color:var(--accent)">${fav.reference}</strong>
+                                <p>${fav.text}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            area.innerHTML = html;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        init();
+        console.log('📖 Biblia lista con traducción, voz y favoritos');
+    </script>
+</body>
+</html>
